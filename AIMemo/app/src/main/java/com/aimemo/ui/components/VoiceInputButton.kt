@@ -15,9 +15,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicNone
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -208,5 +210,116 @@ fun VoiceRecognitionIndicator(
             )
         }
         else -> {}
+    }
+}
+
+/**
+ * 紧凑型语音输入按钮（FilledTonalButton 版本）
+ * 用于嵌入操作按钮行中，替代原有的圆形 FAB 样式
+ * 符合 Material 3 辅助按钮规范，与清空/解析按钮视觉统一
+ *
+ * 与 VoiceInputButton（FAB 版本）的区别：
+ * - 使用 FilledTonalButton 替代 FloatingActionButton
+ * - 圆角矩形形状（12dp），适合横向按钮行排列
+ * - 移除脉冲动画效果（在紧凑布局中不需要）
+ * - 保留完整的权限请求和语音识别逻辑
+ *
+ * @param onTextRecognized 语音识别成功后的文本回调
+ * @param onError 语音识别发生错误时的回调
+ * @param modifier 修饰符，用于自定义布局和样式
+ */
+@Composable
+fun VoiceInputButtonCompact(
+    onTextRecognized: (String) -> Unit,
+    onError: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    // 语音识别管理器（与 FAB 版本共享同一实现）
+    val voiceManager = remember { VoiceRecognitionManager(context) }
+
+    // 收集语音识别状态
+    val recognitionState by voiceManager.recognitionState.collectAsState()
+    val recognizedText by voiceManager.recognizedText.collectAsState()
+    val errorMessage by voiceManager.errorMessage.collectAsState()
+
+    // 权限请求启动器
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            voiceManager.startListening()
+        } else {
+            onError("需要麦克风权限才能使用语音输入功能")
+        }
+    }
+
+    // 检查麦克风权限状态
+    val hasRecordPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.RECORD_AUDIO
+    ) == PackageManager.PERMISSION_GRANTED
+
+    // 监听识别结果并回调
+    LaunchedEffect(recognitionState) {
+        when (recognitionState) {
+            is VoiceRecognitionManager.RecognitionState.Completed -> {
+                if (recognizedText.isNotEmpty()) {
+                    onTextRecognized(recognizedText)
+                    voiceManager.reset()
+                }
+            }
+            is VoiceRecognitionManager.RecognitionState.Error -> {
+                errorMessage?.let { onError(it) }
+            }
+            else -> {}
+        }
+    }
+
+    // 组件销毁时释放资源
+    DisposableEffect(Unit) {
+        onDispose { voiceManager.destroy() }
+    }
+
+    val isListening = recognitionState is VoiceRecognitionManager.RecognitionState.Listening
+
+    // 紧凑型圆角矩形按钮（FilledTonalButton）
+    FilledTonalButton(
+        onClick = {
+            if (hasRecordPermission) {
+                when (recognitionState) {
+                    is VoiceRecognitionManager.RecognitionState.Idle,
+                    is VoiceRecognitionManager.RecognitionState.Completed,
+                    is VoiceRecognitionManager.RecognitionState.Error -> {
+                        voiceManager.startListening()
+                    }
+                    is VoiceRecognitionManager.RecognitionState.Listening -> {
+                        voiceManager.stopListening()
+                    }
+                    is VoiceRecognitionManager.RecognitionState.Processing -> {
+                        // 处理中，不响应点击
+                    }
+                }
+            } else {
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        },
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Icon(
+            imageVector = when (recognitionState) {
+                is VoiceRecognitionManager.RecognitionState.Listening -> Icons.Default.Mic
+                is VoiceRecognitionManager.RecognitionState.Processing -> Icons.Default.Mic
+                else -> Icons.Default.MicNone
+            },
+            contentDescription = when (recognitionState) {
+                is VoiceRecognitionManager.RecognitionState.Listening -> "正在录音，点击停止"
+                is VoiceRecognitionManager.RecognitionState.Processing -> "正在识别..."
+                else -> "点击开始语音输入"
+            },
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

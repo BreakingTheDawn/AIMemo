@@ -2,7 +2,6 @@ package com.aimemo.ui.screens
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,32 +33,21 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,20 +57,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aimemo.data.model.ScheduleEntity
 import com.aimemo.ui.components.ApiKeyInputDialog
-import com.aimemo.ui.components.QuickPhraseChips
+import com.aimemo.ui.components.NoteInputCard
 import com.aimemo.ui.components.ScheduleCard
 import com.aimemo.ui.components.ScheduleDetailDialog
 import com.aimemo.ui.components.ScheduleEditDialog
 import com.aimemo.ui.components.ShimmerScheduleCard
 import com.aimemo.ui.components.SwipeableScheduleCard
-import com.aimemo.ui.components.VoiceInputButton
 import com.aimemo.ui.viewmodel.MainViewModel
 import com.aimemo.util.CalendarUtils
 
@@ -139,16 +125,17 @@ fun MainScreen(
     // 主界面结构
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "AI Memo",
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                colors = androidx.compose.material3.TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 actions = {
                     // 主题切换按钮
@@ -156,7 +143,7 @@ fun MainScreen(
                         Icon(
                             imageVector = if (themeMode == "dark") Icons.Default.DarkMode else if (themeMode == "light") Icons.Default.LightMode else Icons.Default.BrightnessMedium,
                             contentDescription = "切换主题",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     // API密钥设置按钮
@@ -164,7 +151,7 @@ fun MainScreen(
                         Icon(
                             imageVector = Icons.Default.Key,
                             contentDescription = "设置API密钥",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -184,7 +171,7 @@ fun MainScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            // 输入区域
+            // 输入区域 - 使用 NoteInputCard 独立组件
             AnimatedVisibility(
                 visible = !isLoading,
                 enter = slideInVertically(
@@ -198,7 +185,7 @@ fun MainScreen(
                     animationSpec = tween(300)
                 )
             ) {
-                InputSection(
+                NoteInputCard(
                     inputText = inputText,
                     isLoading = isLoading,
                     onInputChange = { viewModel.updateInputText(it) },
@@ -367,133 +354,6 @@ private fun ThemeOption(
 }
 
 /**
- * 输入区域组件
- */
-@Composable
-private fun InputSection(
-    inputText: String,
-    isLoading: Boolean,
-    onInputChange: (String) -> Unit,
-    onParseClick: () -> Unit,
-    onClearClick: () -> Unit,
-    onVoiceText: (String) -> Unit,
-    onVoiceError: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        // 文本输入框
-        OutlinedTextField(
-            value = inputText,
-            onValueChange = onInputChange,
-            label = { Text("输入日程文本") },
-            placeholder = { 
-                Text(
-                    text = "例如：下周二早上10点在南山区科技园有个产品会",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            maxLines = 5,
-            trailingIcon = {
-                if (inputText.isNotEmpty()) {
-                    IconButton(onClick = onClearClick) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "清空"
-                        )
-                    }
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 快捷短语选择
-        QuickPhraseChips(
-            onPhraseSelected = { phrase ->
-                onInputChange(phrase)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 操作按钮行
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 语音输入按钮
-            VoiceInputButton(
-                onTextRecognized = { text ->
-                    onVoiceText(text)
-                },
-                onError = { error ->
-                    onVoiceError(error)
-                }
-            )
-
-            // 右侧按钮组
-            Row(
-                horizontalArrangement = Arrangement.End
-            ) {
-                // 清空按钮
-                OutlinedButton(
-                    onClick = onClearClick,
-                    enabled = inputText.isNotEmpty() && !isLoading
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("清空")
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // 解析按钮
-                Button(
-                    onClick = onParseClick,
-                    enabled = inputText.isNotEmpty() && !isLoading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = androidx.compose.ui.graphics.Color.Transparent
-                    ),
-                    modifier = Modifier
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.secondary
-                                )
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (isLoading) "解析中..." else "AI 智能解析")
-                }
-            }
-        }
-    }
-}
-
-/**
  * 日程列表区域组件
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -571,6 +431,12 @@ private fun ScheduleListSection(
 /**
  * 空状态组件
  * 当日程列表为空时显示，提供友好的用户引导
+ * 使用 outlineVariant 色调营造轻盈、不抢焦点的视觉效果
+ *
+ * 视觉层次：
+ * - 图标：outlineVariant（极浅灰），低调存在
+ * - 主标题：onSurface（深色）+ headlineSmall，清晰可读
+ * - 副提示：onSurfaceVariant + bodyMedium（小字号浅灰），辅助信息
  */
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
@@ -581,29 +447,29 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 使用更大的图标增强视觉效果
+            // 日历图标 - 使用 outlineVariant 极浅灰色，轻盈不抢焦点
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = null,
                 modifier = Modifier.size(120.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                tint = MaterialTheme.colorScheme.outlineVariant
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 主标题
+            // 主提示语 - 深色 headlineSmall，确保清晰可读
             Text(
                 text = "暂无日程",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 引导文字
+            // 副提示语 - 浅灰 bodyMedium，更小更轻的辅助文字
             Text(
                 text = "粘贴会议记录或行程\n让我为你整理",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
