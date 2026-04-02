@@ -2,8 +2,7 @@ package com.aimemo.ui.screens
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.provider.CalendarContract
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,8 +20,10 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
@@ -36,6 +37,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -52,6 +54,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,6 +65,7 @@ import com.aimemo.ui.components.ScheduleCard
 import com.aimemo.ui.components.ScheduleDetailDialog
 import com.aimemo.ui.components.ScheduleEditDialog
 import com.aimemo.ui.viewmodel.MainViewModel
+import com.aimemo.util.CalendarUtils
 
 /**
  * 主屏幕
@@ -188,7 +192,17 @@ fun MainScreen(
             schedule = selectedSchedule!!,
             onDismiss = { viewModel.hideDetailDialog() },
             onEdit = { viewModel.showEditDialog(selectedSchedule!!) },
-            onDelete = { viewModel.deleteSchedule(selectedSchedule!!) }
+            onDelete = { viewModel.deleteSchedule(selectedSchedule!!) },
+            onAddToCalendar = {
+                // 添加到系统日历
+                val calendarIntent = CalendarUtils.createCalendarIntent(context, selectedSchedule!!)
+                context.startActivity(Intent.createChooser(calendarIntent, "添加到日历"))
+            },
+            onShare = {
+                // 分享日程
+                val shareIntent = CalendarUtils.createShareIntent(selectedSchedule!!)
+                context.startActivity(Intent.createChooser(shareIntent, "分享日程"))
+            }
         )
     }
 
@@ -264,7 +278,20 @@ private fun InputSection(
             // 解析按钮
             Button(
                 onClick = onParseClick,
-                enabled = inputText.isNotEmpty() && !isLoading
+                enabled = inputText.isNotEmpty() && !isLoading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
+                ),
+                modifier = Modifier
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.secondary
+                            )
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    )
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -274,13 +301,13 @@ private fun InputSection(
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = Icons.Default.AutoAwesome,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(if (isLoading) "解析中..." else "解析")
+                Text(if (isLoading) "解析中..." else "AI 智能解析")
             }
         }
     }
