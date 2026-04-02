@@ -176,3 +176,66 @@ fun PriorityChip(priority: String) {
         )
     }
 }
+
+/**
+ * Shimmer加载占位卡片
+ * 在数据加载时显示，营造AI正在思考的科技感
+ */
+@Composable
+fun ShimmerScheduleCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // 左侧色块占位
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(80.dp)
+                    .shimmer()
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // 标题占位
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(16.dp)
+                        .shimmer()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // 时间占位
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .height(12.dp)
+                        .shimmer()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 地点占位
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(12.dp)
+                        .shimmer()
+                )
+            }
+        }
+    }
+}
