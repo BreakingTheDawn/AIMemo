@@ -16,8 +16,8 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ElevatedCardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,7 +77,7 @@ fun NoteInputCard(
         // ========== 输入框卡片区域（24dp 大圆角 ElevatedCard）==========
         ElevatedCard(
             shape = RoundedCornerShape(24.dp),
-            elevation = ElevatedCardDefaults.elevatedCardElevation(
+            elevation = CardDefaults.elevatedCardElevation(
                 defaultElevation = 2.dp
             )
         ) {
