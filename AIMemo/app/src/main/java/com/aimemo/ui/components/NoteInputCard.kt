@@ -3,6 +3,7 @@ package com.aimemo.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,10 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledButton
+import androidx.compose.material3.ElevatedCardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -73,7 +77,7 @@ fun NoteInputCard(
         // ========== 输入框卡片区域（24dp 大圆角 ElevatedCard）==========
         ElevatedCard(
             shape = RoundedCornerShape(24.dp),
-            elevation = androidx.compose.material3.ElevatedCardDefaults.elevatedCardElevation(
+            elevation = ElevatedCardDefaults.elevatedCardElevation(
                 defaultElevation = 2.dp
             )
         ) {
@@ -99,7 +103,7 @@ fun NoteInputCard(
 
                 // 右下角半透明清空按钮（仅输入非空时显示）
                 if (inputText.isNotEmpty()) {
-                    androidx.compose.material3.IconButton(
+                    IconButton(
                         onClick = onClearClick,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -164,8 +168,8 @@ fun NoteInputCard(
                 Text("清空")
             }
 
-            // AI 智能解析按钮（FilledButton - 主操作，占据剩余空间）
-            FilledButton(
+            // AI 智能解析按钮（Button - 主操作，占据剩余空间）
+            Button(
                 onClick = onParseClick,
                 enabled = inputText.isNotEmpty() && !isLoading,
                 modifier = Modifier.weight(1f)
