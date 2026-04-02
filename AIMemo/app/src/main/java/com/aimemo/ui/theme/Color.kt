@@ -16,14 +16,14 @@ import androidx.core.view.WindowCompat
 // 颜色定义
 // ========================================
 
-// 主色调 - 蓝色系
-val Primary = Color(0xFF1976D2)
-val PrimaryVariant = Color(0xFF1565C0)
+// 主色调 - Indigo系
+val Primary = Color(0xFF3F51B5)        // Indigo 500
+val PrimaryVariant = Color(0xFF303F9F)  // Indigo 700
 val OnPrimary = Color.White
 
-// 次要色 - 青色系
-val Secondary = Color(0xFF00ACC1)
-val SecondaryVariant = Color(0xFF00838F)
+// 次要色 - Teal系（与Indigo搭配）
+val Secondary = Color(0xFF009688)       // Teal 500
+val SecondaryVariant = Color(0xFF00796B) // Teal 700
 val OnSecondary = Color.White
 
 // 背景色
@@ -42,10 +42,10 @@ val DarkOnSecondary = Color(0xFF1C1B1F)
 val DarkOnBackground = Color.White
 val DarkOnSurface = Color.White
 
-// 优先级颜色
-val PriorityHigh = Color(0xFFE53935)
-val PriorityMedium = Color(0xFFFFA726)
-val PriorityLow = Color(0xFF66BB6A)
+// 优先级颜色（按文档要求）
+val PriorityHigh = Color(0xFFF44336)    // Red 500
+val PriorityMedium = Color(0xFFFF9800)   // Orange 500
+val PriorityLow = Color(0xFF2196F3)      // Blue 500
 
 // ========================================
 // 主题定义
