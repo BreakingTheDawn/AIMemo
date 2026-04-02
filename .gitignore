@@ -1,0 +1,46 @@
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Android Studio
+.navigation/
+captures/
+*.apk
+*.ap_
+*.aab
+
+# NDK
+obj/
+externalNativeBuild/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Signed files
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Backup files
+*~
+*.swp
+*.bak
+
+# Trae AI files
+.trae/
+
+# Project documentation (not for public repo)
+docs/
