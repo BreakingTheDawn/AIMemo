@@ -34,6 +34,11 @@ Thumbs.db
 # Log files
 *.log
 
+# Build logs
+build_log.txt
+compile_error.log
+build_test.log
+
 # Backup files
 *~
 *.swp
