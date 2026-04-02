@@ -14,6 +14,9 @@ import androidx.room.PrimaryKey
  * - time: 解析后的时间（yyyy-MM-dd HH:mm格式）
  * - location: 解析后的地点
  * - priority: 优先级（高/中/低）
+ * - reminderEnabled: 是否启用提醒
+ * - reminderTime: 提醒时间（时间戳，毫秒）
+ * - reminderMinutesBefore: 提前多少分钟提醒
  * - createdAt: 创建时间
  * - updatedAt: 更新时间
  */
@@ -31,6 +34,12 @@ data class ScheduleEntity(
     val location: String,
     
     val priority: String,
+    
+    val reminderEnabled: Boolean = false,
+    
+    val reminderTime: Long = 0L,
+    
+    val reminderMinutesBefore: Int = 15,
     
     val createdAt: Long = System.currentTimeMillis(),
     

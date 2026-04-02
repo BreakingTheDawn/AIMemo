@@ -34,6 +34,7 @@ import com.aimemo.data.model.ScheduleEntity
 import com.aimemo.ui.theme.PriorityHigh
 import com.aimemo.ui.theme.PriorityLow
 import com.aimemo.ui.theme.PriorityMedium
+import com.aimemo.util.PriorityCalculator
 
 /**
  * 日程卡片组件
@@ -41,14 +42,16 @@ import com.aimemo.ui.theme.PriorityMedium
  * 
  * @param schedule 日程数据实体
  * @param onClick 点击事件回调
+ * @param modifier 修饰符，用于自定义布局和样式
  */
 @Composable
 fun ScheduleCard(
     schedule: ScheduleEntity,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
@@ -121,6 +124,22 @@ fun ScheduleCard(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        
+                        // 显示时间紧迫度
+                        val urgencyDesc = PriorityCalculator.getUrgencyDescription(schedule.time)
+                        if (urgencyDesc.isNotEmpty() && urgencyDesc != "已过期") {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "($urgencyDesc)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = when {
+                                    schedule.priority == "高" -> PriorityHigh
+                                    urgencyDesc == "即将到期" -> PriorityHigh
+                                    urgencyDesc.contains("小时") -> PriorityMedium
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }

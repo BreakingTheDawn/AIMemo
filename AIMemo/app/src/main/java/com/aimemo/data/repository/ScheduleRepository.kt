@@ -9,6 +9,7 @@ import com.aimemo.data.model.GLMRequest
 import com.aimemo.data.model.Message
 import com.aimemo.data.model.ScheduleEntity
 import com.aimemo.data.remote.NetworkClient
+import com.aimemo.util.PriorityCalculator
 import com.aimemo.util.PromptConstants
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -61,12 +62,19 @@ class ScheduleRepository(context: Context) {
             }
 
             // 创建日程实体并保存
+            // 使用本地优先级校验，综合时间紧迫度和语义紧急程度
+            val finalPriority = PriorityCalculator.calculatePriority(
+                timeStr = parseResult.Time,
+                originalText = inputText,
+                aiPriority = parseResult.Priority
+            )
+
             val schedule = ScheduleEntity(
                 originalText = inputText,
                 event = parseResult.Event,
                 time = parseResult.Time,
                 location = parseResult.Location,
-                priority = parseResult.Priority
+                priority = finalPriority
             )
 
             val insertedId = scheduleDao.insert(schedule)

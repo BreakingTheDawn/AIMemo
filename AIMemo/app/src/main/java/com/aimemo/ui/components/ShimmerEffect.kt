@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -36,12 +37,16 @@ fun Modifier.shimmer(): Modifier = composed {
         label = "shimmer_offset"
     )
 
+    // 使用主题色系创建Shimmer效果
+    val baseColor = MaterialTheme.colorScheme.surfaceVariant
+    val highlightColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+
     background(
         brush = Brush.linearGradient(
             colors = listOf(
-                Color(0xFFB8B5B5),
-                Color(0xFF8F8B8B),
-                Color(0xFFB8B5B5)
+                baseColor,
+                highlightColor,
+                baseColor
             ),
             start = Offset(startOffsetX, 0f),
             end = Offset(startOffsetX + size.width.toFloat(), size.height.toFloat())

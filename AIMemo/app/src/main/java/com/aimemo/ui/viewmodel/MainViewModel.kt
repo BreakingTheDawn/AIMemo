@@ -3,8 +3,11 @@ package com.aimemo.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.aimemo.data.local.ThemePreferences
 import com.aimemo.data.model.ScheduleEntity
 import com.aimemo.data.repository.ScheduleRepository
+import com.aimemo.util.NotificationHelper
+import com.aimemo.util.ReminderManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = ScheduleRepository(application)
+    private val context = application.applicationContext
 
     // 日程列表（响应式数据流）
     val schedules: StateFlow<List<ScheduleEntity>> = repository.getAllSchedules()
@@ -63,6 +67,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // 是否显示详情对话框
     private val _showDetailDialog = MutableStateFlow(false)
     val showDetailDialog: StateFlow<Boolean> = _showDetailDialog.asStateFlow()
+
+    // 主题模式状态
+    private val _themeMode = MutableStateFlow("system")
+    val themeMode: StateFlow<String> = _themeMode.asStateFlow()
+
+    /**
+     * 初始化
+     */
+    init {
+        // 初始化通知渠道
+        NotificationHelper.createNotificationChannel(context)
+        
+        // 加载主题偏好
+        viewModelScope.launch {
+            ThemePreferences.getThemeMode(context).collect { mode ->
+                _themeMode.value = mode
+            }
+        }
+    }
+
+    /**
+     * 设置主题模式
+     */
+    fun setThemeMode(mode: String) {
+        viewModelScope.launch {
+            ThemePreferences.setThemeMode(context, mode)
+            _themeMode.value = mode
+        }
+    }
 
     /**
      * 更新输入文本
@@ -163,13 +196,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * 更新日程
+     * 更新日程（包含提醒设置）
      */
     fun updateSchedule(
         event: String,
         time: String,
         location: String,
-        priority: String
+        priority: String,
+        reminderEnabled: Boolean = false,
+        reminderMinutesBefore: Int = 15
     ) {
         val schedule = _selectedSchedule.value ?: return
 
@@ -178,12 +213,57 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 event = event,
                 time = time,
                 location = location,
-                priority = priority
+                priority = priority,
+                reminderEnabled = reminderEnabled,
+                reminderMinutesBefore = reminderMinutesBefore
             )
             repository.updateSchedule(updatedSchedule)
+            
+            // 重新设置提醒
+            if (reminderEnabled) {
+                val success = ReminderManager.rescheduleReminder(context, updatedSchedule)
+                if (!success) {
+                    _errorMessage.value = "提醒时间已过，无法设置提醒"
+                }
+            } else {
+                ReminderManager.cancelReminder(context, updatedSchedule)
+            }
+            
             _showEditDialog.value = false
             _selectedSchedule.value = null
             _successMessage.value = "日程已更新"
+        }
+    }
+
+    /**
+     * 设置日程提醒
+     */
+    fun setReminder(schedule: ScheduleEntity, minutesBefore: Int) {
+        viewModelScope.launch {
+            val updatedSchedule = schedule.copy(
+                reminderEnabled = true,
+                reminderMinutesBefore = minutesBefore
+            )
+            repository.updateSchedule(updatedSchedule)
+            
+            val success = ReminderManager.setReminder(context, updatedSchedule)
+            if (success) {
+                _successMessage.value = "已设置提醒，提前${minutesBefore}分钟通知"
+            } else {
+                _errorMessage.value = "提醒时间已过，无法设置提醒"
+            }
+        }
+    }
+
+    /**
+     * 取消日程提醒
+     */
+    fun cancelReminder(schedule: ScheduleEntity) {
+        viewModelScope.launch {
+            val updatedSchedule = schedule.copy(reminderEnabled = false)
+            repository.updateSchedule(updatedSchedule)
+            ReminderManager.cancelReminder(context, schedule)
+            _successMessage.value = "已取消提醒"
         }
     }
 
@@ -192,6 +272,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun deleteSchedule(schedule: ScheduleEntity) {
         viewModelScope.launch {
+            // 取消提醒
+            ReminderManager.cancelReminder(context, schedule)
+            
             repository.deleteSchedule(schedule)
             _showDetailDialog.value = false
             _showEditDialog.value = false
@@ -205,6 +288,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    /**
+     * 设置错误消息
+     */
+    fun setErrorMessage(message: String) {
+        _errorMessage.value = message
     }
 
     /**
