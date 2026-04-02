@@ -3,6 +3,12 @@ package com.aimemo.ui.screens
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +70,7 @@ import com.aimemo.ui.components.ApiKeyInputDialog
 import com.aimemo.ui.components.ScheduleCard
 import com.aimemo.ui.components.ScheduleDetailDialog
 import com.aimemo.ui.components.ScheduleEditDialog
+import com.aimemo.ui.components.ShimmerScheduleCard
 import com.aimemo.ui.viewmodel.MainViewModel
 import com.aimemo.util.CalendarUtils
 
@@ -168,6 +175,7 @@ fun MainScreen(
             // 日程列表区域
             ScheduleListSection(
                 schedules = schedules,
+                isLoading = isLoading,
                 onScheduleClick = { viewModel.showScheduleDetail(it) },
                 modifier = Modifier.weight(1f)
             )
@@ -319,6 +327,7 @@ private fun InputSection(
 @Composable
 private fun ScheduleListSection(
     schedules: List<ScheduleEntity>,
+    isLoading: Boolean,
     onScheduleClick: (ScheduleEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -344,23 +353,38 @@ private fun ScheduleListSection(
         Spacer(modifier = Modifier.height(12.dp))
 
         // 列表内容
-        if (schedules.isEmpty()) {
-            EmptyState(
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(
-                    items = schedules,
-                    key = { it.id }
-                ) { schedule ->
-                    ScheduleCard(
-                        schedule = schedule,
-                        onClick = { onScheduleClick(schedule) }
-                    )
+        when {
+            isLoading -> {
+                // 显示Shimmer加载效果
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(3) {
+                        ShimmerScheduleCard()
+                    }
+                }
+            }
+            schedules.isEmpty() -> {
+                EmptyState(
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            else -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = schedules,
+                        key = { it.id }
+                    ) { schedule ->
+                        ScheduleCard(
+                            schedule = schedule,
+                            onClick = { onScheduleClick(schedule) },
+                            modifier = Modifier.animateItemPlacement()
+                        )
+                    }
                 }
             }
         }
