@@ -161,14 +161,28 @@ fun MainScreen(
                 .padding(horizontal = 16.dp)
         ) {
             // 输入区域
-            InputSection(
-                inputText = inputText,
-                isLoading = isLoading,
-                onInputChange = { viewModel.updateInputText(it) },
-                onParseClick = { viewModel.parseText() },
-                onClearClick = { viewModel.clearInput() },
-                modifier = Modifier.padding(top = 16.dp)
-            )
+            AnimatedVisibility(
+                visible = !isLoading,
+                enter = slideInVertically(
+                    animationSpec = tween(300)
+                ) + fadeIn(
+                    animationSpec = tween(300)
+                ),
+                exit = slideOutVertically(
+                    animationSpec = tween(300)
+                ) + fadeOut(
+                    animationSpec = tween(300)
+                )
+            ) {
+                InputSection(
+                    inputText = inputText,
+                    isLoading = isLoading,
+                    onInputChange = { viewModel.updateInputText(it) },
+                    onParseClick = { viewModel.parseText() },
+                    onClearClick = { viewModel.clearInput() },
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
