@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,10 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -51,15 +48,13 @@ import androidx.compose.ui.unit.dp
  * └─────────────────────────────┘
  * ▓▓▓ LinearProgressIndicator (加载时显示)
  * [💡快捷短语1] [💡快捷短语2] ...
- * [🎤语音] [清空] [✨AI智能解析(占满)]
+ * [清空] [✨AI智能解析(占满)]
  *
  * @param inputText 当前输入框中的文本内容
  * @param isLoading 是否正在加载（AI 解析进行中）
  * @param onInputChange 输入文本变更回调
  * @param onParseClick AI 智能解析按钮点击回调
  * @param onClearClick 清空按钮点击回调
- * @param onVoiceText 语音识别成功后的文本回调
- * @param onVoiceError 语音识别发生错误时的回调
  * @param modifier 修饰符，用于自定义布局和样式
  */
 @Composable
@@ -69,8 +64,6 @@ fun NoteInputCard(
     onInputChange: (String) -> Unit,
     onParseClick: () -> Unit,
     onClearClick: () -> Unit,
-    onVoiceText: (String) -> Unit,
-    onVoiceError: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -148,12 +141,6 @@ fun NoteInputCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 语音输入按钮（FilledTonalButton - 辅助操作）
-            VoiceInputButtonCompact(
-                onTextRecognized = onVoiceText,
-                onError = onVoiceError
-            )
-
             // 清空按钮（OutlinedButton - 次要操作）
             OutlinedButton(
                 onClick = onClearClick,

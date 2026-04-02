@@ -191,12 +191,6 @@ fun MainScreen(
                     onInputChange = { viewModel.updateInputText(it) },
                     onParseClick = { viewModel.parseText() },
                     onClearClick = { viewModel.clearInput() },
-                    onVoiceText = { text ->
-                        viewModel.updateInputText(text)
-                    },
-                    onVoiceError = { error ->
-                        viewModel.setErrorMessage(error)
-                    },
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }

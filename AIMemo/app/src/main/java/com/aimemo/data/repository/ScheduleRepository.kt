@@ -16,6 +16,7 @@ import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * 日程数据仓库
@@ -89,10 +90,27 @@ class ScheduleRepository(context: Context) {
 
     /**
      * 调用GLM API解析文本
+     * 动态注入当前日期时间，确保AI能正确解析相对时间
      */
     private suspend fun parseTextWithAI(inputText: String, apiKey: String): AIParseResult? {
         return try {
-            // 构建请求
+            // 获取当前日期时间，注入到 prompt 中
+            val currentDateTime = LocalDateTime.now()
+            val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.getDefault())
+            val currentDateTimeStr = currentDateTime.format(dateFormatter)
+            val weekdayName = when (currentDateTime.dayOfWeek.value) {
+                1 -> "周一"
+                2 -> "周二"
+                3 -> "周三"
+                4 -> "周四"
+                5 -> "周五"
+                6 -> "周六"
+                7 -> "周日"
+                else -> ""
+            }
+            val currentDateTimeInfo = "$currentDateTimeStr ($weekdayName)"
+
+            // 构建请求，在 user prompt 中注入当前日期
             val request = GLMRequest(
                 model = "glm-4",
                 messages = listOf(
@@ -102,7 +120,11 @@ class ScheduleRepository(context: Context) {
                     ),
                     Message(
                         role = "user",
-                        content = String.format(PromptConstants.USER_PROMPT_TEMPLATE, inputText)
+                        content = String.format(
+                            PromptConstants.USER_PROMPT_TEMPLATE,
+                            currentDateTimeInfo,
+                            inputText
+                        )
                     )
                 ),
                 temperature = 0.3
