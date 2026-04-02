@@ -22,10 +22,21 @@ android {
         }
     }
 
+    // 签名配置
+    signingConfigs {
+        create("release") {
+            storeFile = file("../aimemo-release.keystore")
+            storePassword = "aimemo123"
+            keyAlias = "aimemo"
+            keyPassword = "aimemo123"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

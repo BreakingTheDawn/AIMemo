@@ -74,7 +74,12 @@ fun ApiKeyInputDialog(
                         showError = false
                     },
                     label = { Text("API密钥") },
-                    placeholder = { Text("请输入GLM API密钥") },
+                    placeholder = { 
+                        Text(
+                            text = "请输入GLM API密钥",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    },
                     isError = showError,
                     supportingText = if (showError) {
                         { Text("API密钥不能为空") }

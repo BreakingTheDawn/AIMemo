@@ -44,3 +44,8 @@ Thumbs.db
 
 # Project documentation (not for public repo)
 docs/
+
+# Planning files (local development tracking)
+task_plan.md
+progress.md
+findings.md

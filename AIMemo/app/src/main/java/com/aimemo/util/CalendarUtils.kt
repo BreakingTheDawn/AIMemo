@@ -20,11 +20,10 @@ object CalendarUtils {
 
     /**
      * 创建添加日程到系统日历的Intent
-     * @param context 上下文
      * @param schedule 日程实体
      * @return Intent对象
      */
-    fun createCalendarIntent(context: Context, schedule: ScheduleEntity): Intent {
+    fun createCalendarIntent(schedule: ScheduleEntity): Intent {
         val intent = Intent(Intent.ACTION_INSERT).apply {
             data = CalendarContract.Events.CONTENT_URI
             putExtra(CalendarContract.Events.TITLE, schedule.event)

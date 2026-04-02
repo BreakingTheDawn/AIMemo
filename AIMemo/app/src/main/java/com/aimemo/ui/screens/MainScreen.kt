@@ -10,6 +10,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -247,7 +248,7 @@ fun MainScreen(
             onDelete = { viewModel.deleteSchedule(selectedSchedule!!) },
             onAddToCalendar = {
                 // 添加到系统日历
-                val calendarIntent = CalendarUtils.createCalendarIntent(context, selectedSchedule!!)
+                val calendarIntent = CalendarUtils.createCalendarIntent(selectedSchedule!!)
                 context.startActivity(Intent.createChooser(calendarIntent, "添加到日历"))
             },
             onShare = {
@@ -337,6 +338,7 @@ private fun ThemeOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(vertical = 12.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -384,7 +386,12 @@ private fun InputSection(
             value = inputText,
             onValueChange = onInputChange,
             label = { Text("输入日程文本") },
-            placeholder = { Text("例如：下周二早上10点在南山区科技园有个产品会") },
+            placeholder = { 
+                Text(
+                    text = "例如：下周二早上10点在南山区科技园有个产品会",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3,
             maxLines = 5,

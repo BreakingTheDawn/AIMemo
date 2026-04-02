@@ -3,6 +3,7 @@ package com.aimemo.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.aimemo.data.local.ApiKeyPreferences
 import com.aimemo.data.local.ThemePreferences
 import com.aimemo.data.model.ScheduleEntity
 import com.aimemo.data.repository.ScheduleRepository
@@ -85,6 +86,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _themeMode.value = mode
             }
         }
+        
+        // 加载已保存的API密钥
+        viewModelScope.launch {
+            ApiKeyPreferences.getApiKey(context).collect { savedKey ->
+                _apiKey.value = savedKey
+            }
+        }
     }
 
     /**
@@ -106,9 +114,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * 更新API密钥
+     * 同时保存到持久化存储
      */
     fun updateApiKey(key: String) {
-        _apiKey.value = key
+        viewModelScope.launch {
+            ApiKeyPreferences.setApiKey(context, key)
+            _apiKey.value = key
+        }
     }
 
     /**

@@ -110,6 +110,13 @@ class VoiceRecognitionManager(private val context: Context) {
      * 开始语音识别
      */
     fun startListening() {
+        // 检查设备是否支持语音识别
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            _recognitionState.value = RecognitionState.Error(-1)
+            _errorMessage.value = "当前设备不支持语音识别，请使用真机测试或安装 Google 语音服务"
+            return
+        }
+        
         initSpeechRecognizer()
         
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -163,18 +170,19 @@ class VoiceRecognitionManager(private val context: Context) {
 
     /**
      * 获取错误描述文本
+     * 提供更详细的错误说明和解决建议
      */
     private fun getErrorText(errorCode: Int): String {
         return when (errorCode) {
-            SpeechRecognizer.ERROR_AUDIO -> "音频录制错误"
-            SpeechRecognizer.ERROR_CLIENT -> "客户端错误"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "权限不足"
-            SpeechRecognizer.ERROR_NETWORK -> "网络错误"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "网络超时"
-            SpeechRecognizer.ERROR_NO_MATCH -> "未识别到语音"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "识别器忙碌"
-            SpeechRecognizer.ERROR_SERVER -> "服务器错误"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "未检测到语音输入"
+            SpeechRecognizer.ERROR_AUDIO -> "音频录制错误，请检查麦克风是否正常"
+            SpeechRecognizer.ERROR_CLIENT -> "客户端错误，请确保设备安装了 Google 语音服务，建议使用真机测试"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "权限不足，请授予麦克风权限"
+            SpeechRecognizer.ERROR_NETWORK -> "网络错误，请检查网络连接"
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "网络超时，请检查网络连接后重试"
+            SpeechRecognizer.ERROR_NO_MATCH -> "未识别到语音，请靠近麦克风重新说话"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "识别器忙碌，请稍后重试"
+            SpeechRecognizer.ERROR_SERVER -> "服务器错误，请稍后重试"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "未检测到语音输入，请靠近麦克风说话"
             else -> "未知错误 ($errorCode)"
         }
     }
