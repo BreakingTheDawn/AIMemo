@@ -25,7 +25,7 @@ android {
     // 签名配置
     signingConfigs {
         create("release") {
-            storeFile = file("../aimemo-release.keystore")
+            storeFile = file("aimemo-release.keystore")
             storePassword = "aimemo123"
             keyAlias = "aimemo"
             keyPassword = "aimemo123"
